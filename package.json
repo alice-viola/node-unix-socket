@@ -1,0 +1,17 @@
+{
+  "name": "unix-domain-socket",
+  "version": "0.0.1",
+  "description": "UDS SOCK_STREAM wrapper around Node Net",
+  "main": "dist/index.js",
+  "scripts": {
+    "start-dev-server": "ts-node examples/server.ts",
+    "start-dev-client": "ts-node examples/client.ts",
+    "build": "npx tsc --build"
+  },
+  "author": "Amedeo Setti",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}
