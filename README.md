@@ -7,27 +7,31 @@ Wrapper around Node Net SOCK_STREAM.
 **Server:**
 
 ```js
-import UnixSocket from '../index'
+let UnixSocket = require('unix-domain-socket')
 
 let us = new UnixSocket('/tmp/test-socket')
 
 us.listen((conn, msg) => {
-	console.log(msg)
-	us.sendBack(conn, 'alice')
+  console.log(msg)
+  us.sendBack(conn, 'alice')
 })
 ```
 
 **Client:**
 
 ```js
-import UnixSocket from '../index'
+let UnixSocket = require('unix-domain-socket')
 
 let us = new UnixSocket('/tmp/test-socket')
 
 us.send('bob', (response) => {
-	console.log(response)
-}, true)		
+  console.log(response)
+})		
 
+// Keep the connection alive
+us.send('bob', (response) => {
+  console.log(response)
+}, true) 		
 ```
 
 ## Configuration
@@ -35,20 +39,20 @@ us.send('bob', (response) => {
 Custom messagge formatter:
 
 ```js
-import UnixSocket from '../index'
+let UnixSocket = require('unix-domain-socket')
 
 let us = new UnixSocket('/tmp/test-socket')
 
 us.formatIncomingMessage = (msg) => {
-	return JSON.parse(msg)
+  return JSON.parse(msg)
 }
 us.formatOutgoingMessage = (msg) => {
-	return JSON.stringify(msg)
+  return JSON.stringify(msg)
 }
 
 us.listen((conn, msg) => {
-	console.log(msg)
-	us.sendBack(conn, {name: 'alice'})
+  console.log(msg)
+  us.sendBack(conn, {name: 'alice'})
 })
 ```
 
@@ -56,7 +60,7 @@ Configure the delimiter:
 
 ```js
 let us = new UnixSocket('/tmp/test-socket', {
-	endDelimiter: '__MY_CUSTOM_DELIMITER__'
+  endDelimiter: '__MY_CUSTOM_DELIMITER__'
 })
 ```
 

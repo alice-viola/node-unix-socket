@@ -1,4 +1,4 @@
-import UnixSocket from '../index'
+let UnixSocket = require('../index')
 
 let us = new UnixSocket('/tmp/test-socket')
 

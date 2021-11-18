@@ -1,7 +1,7 @@
 let net = require('net')
 let fs = require('fs')
 
-class UnixSocket {
+module.exports = class UnixSocket {
 	#socketFile: string
 	#client: any
 	#server: any
@@ -132,5 +132,3 @@ class UnixSocket {
         }   		
 	} 
 }
-
-export default UnixSocket

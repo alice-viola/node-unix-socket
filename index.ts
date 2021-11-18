@@ -1,3 +1,3 @@
-import UnixSocket from './src/unix-socket'
+'use strict' 
 
-export default UnixSocket
+module.exports = require('./src/unix-socket')

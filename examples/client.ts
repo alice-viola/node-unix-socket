@@ -1,4 +1,4 @@
-import UnixSocket from '../index'
+let UnixSocket = require('../index')
 
 let us = new UnixSocket('/tmp/test-socket')
 
@@ -9,7 +9,6 @@ us.formatOutgoingMessage = (msg) => {
 	return JSON.stringify(msg)
 }
 
-
 us.send({name: 'bob'}, (response) => {
 	console.log(response)
-}, true)		
+})		
