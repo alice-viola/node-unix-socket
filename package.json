@@ -1,6 +1,6 @@
 {
   "name": "unix-domain-socket",
-  "version": "0.0.2",
+  "version": "0.0.21",
   "description": "UDS SOCK_STREAM wrapper around Node Net",
   "main": "dist/index.js",
   "scripts": {
@@ -17,5 +17,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/adda25/node-unix-socket"
-  }  
+  },
+  "keywords": ["unix-socket", "unix-domain-socket", "IPC", "UDS", "SOCK_STREAM"]  
 }
