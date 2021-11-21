@@ -1,14 +1,13 @@
 let UnixSocket = require('../index')
 
 let us = new UnixSocket('/tmp/test-socket')
+us.payloadAsJSON()
 
-us.formatIncomingMessage = (msg) => {
-	return JSON.parse(msg)
-}
-us.formatOutgoingMessage = (msg) => {
-	return JSON.stringify(msg)
-}
-
-us.send({name: 'bob'}, (response) => {
+let dataToSend = {
+	id: 1,
+	name: 'alice',
+	values: [0, 1, 2]
+} 
+us.send(dataToSend, (response) => {
 	console.log(response)
-})		
+})	

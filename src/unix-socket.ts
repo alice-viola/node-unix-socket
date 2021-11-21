@@ -9,6 +9,7 @@ module.exports = class UnixSocket {
 	#onMessageCallback: Function
 	#dataStream: string
 	#regexMatch: any
+	#onEvents: any
 	formatIncomingMessage: Function
 	formatOutgoingMessage: Function
 
@@ -18,6 +19,7 @@ module.exports = class UnixSocket {
 		this.#server = null	
 		this.#onMessageCallback	= (conn, mex) => {}
 		this.#dataStream = ''
+		this.#onEvents = {}
 		this.#opt = {
 			log: true,
 			endDelimiter: '__STREAM__END__' 
@@ -30,19 +32,62 @@ module.exports = class UnixSocket {
 		this.#regexMatch = new RegExp(`${this.#opt.endDelimiter}`)
 	}
 
+	static IncomingJSON (msg) {
+		return JSON.parse(msg)
+	}
+
+	static OutgoingJSON (msg) {
+		return JSON.stringify(msg)	
+	}
+
+	payloadAsJSON () {
+		this.formatIncomingMessage = UnixSocket.IncomingJSON
+		this.formatOutgoingMessage = UnixSocket.OutgoingJSON
+	}
+
+	getServer () {
+		return this.#server
+	}
+
+	getClient () {
+		return this.#client
+	}
+
+	/**
+	 * Add callback to events 
+	 */
+	on (eventName, cb: Function) {
+		this.#onEvents[eventName] = cb
+	}	
+
+	/**
+	 * Start the server
+	 */
 	listen (cb: Function) {
 		this._server()
 		this.#onMessageCallback = cb
 	}
 
+	/**
+	 * Start the client
+	 */
 	send (msg, cb, keep = false) {
 		this._client(keep)
 		this.#onMessageCallback = cb			
 		this.#client.write(this.formatMessage(msg))
 	}
 
-	sendBack (conn, msg) {
+	/**
+	 * The server can send back data
+	 * to the client connection
+	 */ 
+	reply (conn, msg) {
 		conn.write(this.formatMessage(msg))
+	}	
+
+	// Alias for this.reply
+	sendBack (conn, msg) {
+		this.reply(conn, msg)
 	}
 
 	private _server () {		
@@ -50,18 +95,21 @@ module.exports = class UnixSocket {
 			return 
 		}
 		this._cleanupSocketFile(function () {
-        	this.#server = net.createServer(function(connection: any) {
-        	    // let self = Date.now();
-        	    // connections[self] = (stream)
+        	this.#server = net.createServer(function(connection: any) {      		
         	    connection.on('end', function() {
-        	        //console.log(new Date(), '#> Unix connection end')
-        	    })
+        	    	this.fireOnEvent('end')
+        	    }.bind(this))
         	    connection.on('data', function (data: any) {
 					this.onData(connection, data)
+					this.fireOnEvent('data', data)
         	    }.bind(this))
+        	    connection.on('error', function (data: any) {
+					this.fireOnEvent('error', data)
+        	    }.bind(this))        	    
         	}.bind(this)).listen(this.#socketFile).on('connection', function(socket: any) {
-        	    //console.log(new Date(), '#> Unix Socket connection')  
-        	})		
+        	    //console.log(new Date(), '#> Unix Socket connection') 
+        	    this.fireOnEvent('connect') 
+        	}.bind(this))		
         }.bind(this))
         return this
 	}
@@ -72,18 +120,21 @@ module.exports = class UnixSocket {
 		}		
 		this.#client = net.createConnection(this.#socketFile)
 		this.#client.on('connect', function () {
-
+			this.fireOnEvent('connect')
         }.bind(this))   
         this.#client.on('close', function () {
             this.#client = null
+            this.fireOnEvent('close')
         }.bind(this))                
         this.#client.on('data', function (data) {
         	this.onData(null, data, keep)
+        	this.fireOnEvent('data', data)
         }.bind(this)).on('end', function () {
             this.#client = null
+            this.fireOnEvent('end')
         }.bind(this)).on('error', function(data) {
-            console.error('Server disconnected') 
-        })		
+            this.fireOnEvent('error', data)
+        }.bind(this))		
         return this
 	}
 
@@ -131,4 +182,12 @@ module.exports = class UnixSocket {
             this.#dataStream += data
         }   		
 	} 
+
+	private fireOnEvent (event, data) {
+		const eventCb = this.#onEvents[event]
+		if (eventCb !== undefined 
+			&& eventCb !== null && typeof eventCb == 'function') {
+			eventCb(data)
+		}
+	}
 }

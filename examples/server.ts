@@ -1,15 +1,13 @@
 let UnixSocket = require('../index')
 
 let us = new UnixSocket('/tmp/test-socket')
+us.payloadAsJSON()
 
-us.formatIncomingMessage = (msg) => {
-	return JSON.parse(msg)
-}
-us.formatOutgoingMessage = (msg) => {
-	return JSON.stringify(msg)
-}
+us.on('connect', () => {
+	console.log('Connected')
+})
 
 us.listen((conn, msg) => {
 	console.log(msg)
-	us.sendBack(conn, {name: 'alice'})
+	us.reply(conn, {name: 'alice'})
 })

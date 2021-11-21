@@ -13,7 +13,7 @@ let us = new UnixSocket('/tmp/test-socket')
 
 us.listen((conn, msg) => {
   console.log(msg)
-  us.sendBack(conn, 'alice')
+  us.reply(conn, 'alice')
 })
 ```
 
@@ -34,9 +34,29 @@ us.send('bob', (response) => {
 }, true) 		
 ```
 
+## Builtin JSON formatter
+
+```js
+let UnixSocket = require('../index')
+let us = new UnixSocket('/tmp/test-socket')
+
+us.payloadAsJSON()
+
+const dataToSend = {
+	id: 1,
+	name: 'alice',
+	values: [0, 1, 2]
+} 
+
+us.send(dataToSend, (response) => {
+	console.log(response)
+})	
+
+```
+
 ## Configuration
 
-Custom messagge formatter:
+Custom messagge kind parser:
 
 ```js
 let UnixSocket = require('unix-domain-socket')
@@ -64,4 +84,35 @@ let us = new UnixSocket('/tmp/test-socket', {
 })
 ```
 
+## Events
 
+```js
+let UnixSocket = require('unix-domain-socket')
+
+let us = new UnixSocket('/tmp/test-socket')
+
+us.on('connect', () => {
+	console.log('Connected')
+})
+
+us.on('data', (data) => {
+	console.log('Data', data)
+})
+
+us.on('error', (err) => {
+	console.log('Error', err)
+})
+
+us.on('close', () => {
+	console.log('Close')
+})
+
+```
+
+## Private fields accessor
+
+```js
+
+let serverInstance = us.getServer()
+let clientInstance = us.getClient()
+```
